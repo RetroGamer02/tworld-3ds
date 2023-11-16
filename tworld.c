@@ -22,6 +22,8 @@
 #include	"ver.h"
 
 #include 	<3ds.h>
+#include 	<dirent.h>
+#include 	<errno.h>
 
 /* Bell-ringing macro.
  */
@@ -1524,14 +1526,14 @@ static void initdirs(char const *series, char const *seriesdat,
 		setseriesdatdir(choosepath("sdmc:/3ds/TWorld/", "data", seriesdat));
 	else
     	setseriesdatdir(choosepath(root, "data", seriesdat));
-#ifdef SAVEDIR
-    setsavedir(choosepath(SAVEDIR, ".", save));
-#else
-    if ((dir = getenv("HOME")) && *dir && strlen(dir) < maxpath - 8)
-	setsavedir(choosepath(dir, ".tworld", save));
-    else
-	setsavedir(choosepath(root, "sdmc:/3ds/Tworld/save", save));
-#endif
+//#ifdef SAVEDIR
+    //setsavedir(choosepath(SAVEDIR, ".", save));
+//#else
+    //if ((dir = getenv("HOME")) && *dir && strlen(dir) < maxpath - 8)
+	//setsavedir(choosepath(dir, ".tworld", save));
+    //else
+	setsavedir(choosepath("sdmc:/3ds/TWorld/", "saves", save));
+//#endif
 }
 
 /* Basic number-parsing function that silently clamps input to a valid
@@ -1891,6 +1893,36 @@ int tworld(int argc, char *argv[])
 	Result rc = romfsInit();
 	if (rc)
 		printf("romfsInit: %08lX\n", rc);
+
+	DIR* dir = opendir("sdmc:/3ds/TWorld");
+    if (dir) {
+        closedir(dir);
+    } else if (ENOENT == errno) {
+        //printf("TWorld directory error: %d\n" ,errno);
+        mkdir("sdmc:/3ds/TWorld", 0700);
+    } else {
+        printf("TWorld directory unknown error.\n");
+    }
+
+	dir = opendir("sdmc:/3ds/TWorld/saves");
+    if (dir) {
+        closedir(dir);
+    } else if (ENOENT == errno) {
+        //printf("TWorld directory error: %d\n" ,errno);
+        mkdir("sdmc:/3ds/TWorld/saves", 0700);
+    } else {
+        printf("TWorld saves directory unknown error.\n");
+    }
+
+	dir = opendir("sdmc:/3ds/TWorld/data");
+    if (dir) {
+        closedir(dir);
+    } else if (ENOENT == errno) {
+        //printf("TWorld directory error: %d\n" ,errno);
+        mkdir("sdmc:/3ds/TWorld/data", 0700);
+    } else {
+        printf("TWorld data directory unknown error.\n");
+    }
 
     if (!getsettings(argc, argv, &start))
 	return EXIT_FAILURE;
