@@ -257,6 +257,7 @@ static int createdisplay(void)
 	SDL_FreeSurface(sdlg.screen);
 	sdlg.screen = NULL;
     }
+    SDL_ShowCursor(SDL_DISABLE);
     //flags = SDL_SWSURFACE | SDL_ANYFORMAT;
     //if (fullscreen)
 	//flags |= SDL_FULLSCREEN;

@@ -90,6 +90,27 @@ static int		usepasswds = TRUE;
  */
 static void	      **subtitlestack = NULL;
 
+//Replaces access() function for 3ds.
+bool checkFile(const char* path, int mode)
+{
+    //Todo add better mode check.
+    FILE* f;
+    //Mode 1 being write is a guess as no 
+    //docs or source was found on how access works.
+    if (mode == 1) {
+        f = fopen(path, "w");
+    } else {
+        f = fopen(path, "r");
+    }
+	
+	if (f) {
+        fclose(f);
+		return false;
+	} else {
+        return true;
+    }
+}
+
 /*
  * Text-mode output functions.
  */
@@ -1499,7 +1520,10 @@ static void initdirs(char const *series, char const *seriesdat,
 
     setresdir(choosepath(root, "res", res));
     setseriesdir(choosepath(root, "sets", series));
-    setseriesdatdir(choosepath(root, "data", seriesdat));
+	if (!checkFile("sdmc:/3ds/TWorld/data/chips.dat", 0))
+		setseriesdatdir(choosepath("sdmc:/3ds/TWorld/", "data", seriesdat));
+	else
+    	setseriesdatdir(choosepath(root, "data", seriesdat));
 #ifdef SAVEDIR
     setsavedir(choosepath(SAVEDIR, ".", save));
 #else
